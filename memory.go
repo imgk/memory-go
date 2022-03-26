@@ -1,3 +1,5 @@
+//go:build !malloc_cgo
+
 package memory
 
 import (
@@ -12,11 +14,6 @@ var DefaultAllocator = NewAllocator()
 // pointer is ...
 type pointer struct {
 	Pointer *[]byte
-}
-
-// Bytes is ...
-func (p pointer) Bytes() []byte {
-	return *p.Pointer
 }
 
 // Alloc is ..
