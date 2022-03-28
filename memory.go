@@ -30,7 +30,7 @@ func Free(p pointer) {
 // mem is ...
 type mem int
 
-func (n mem) New() any {
+func (n mem) Alloc() any {
 	// Return a *[]byte instead of []byte ensures that
 	// the []byte is not copied, which would cause a heap
 	// allocation on every call to sync.Pool.Put
@@ -66,7 +66,7 @@ func NewAllocator() *Allocator {
 	alloc.buffers = make([]MemoryPool[[]byte], 17) // 1B -> 64K
 	for k := range alloc.buffers {
 		i := k
-		alloc.buffers[k].Pool.New = mem(1 << uint32(i)).New
+		alloc.buffers[k].Pool.New = mem(1 << uint32(i)).Alloc
 	}
 	return alloc
 }
