@@ -1,4 +1,4 @@
-//go:build !malloc_cgo
+//go:build !malloc_cgo && !malloc_syscall
 
 package memory
 
@@ -17,14 +17,15 @@ type pointer struct {
 }
 
 // Alloc is ..
-func Alloc[T any](n int) (pointer, []T) {
+func Alloc[T any](n int) (pointer, []T, error) {
 	p := DefaultAllocator.Get(n * int(unsafe.Sizeof(*(new(T)))))
-	return p, unsafe.Slice((*T)(unsafe.Pointer(*(*uintptr)(unsafe.Pointer(p.Pointer)))), n)
+	return p, unsafe.Slice((*T)(unsafe.Pointer(*(*uintptr)(unsafe.Pointer(p.Pointer)))), n), nil
 }
 
 // Free is ...
-func Free(p pointer) {
+func Free(p pointer) error {
 	DefaultAllocator.Put(p)
+	return nil
 }
 
 // mem is ...
