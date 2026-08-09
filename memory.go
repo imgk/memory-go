@@ -19,7 +19,19 @@ type pointer struct {
 // Alloc is ..
 func Alloc[T any](n int) (pointer, []T, error) {
 	p := DefaultAllocator.Get(n * int(unsafe.Sizeof(*(new(T)))))
-	return p, unsafe.Slice((*T)(unsafe.Pointer(*(*uintptr)(unsafe.Pointer(p.Pointer)))), n), nil
+	if p.Pointer == nil {
+		return p, nil, nil
+	}
+	buf := *p.Pointer
+	// Take the element pointer from the []byte directly (&buf[0]) instead of
+	// round-tripping through a uintptr read of the slice header. The old form
+	// reinterpreted *[]byte as *uintptr to extract the Data field and converted
+	// that uintptr back via unsafe.Pointer, which violates the unsafe rules
+	// (pointer -> uintptr -> pointer must stay within one expression) and makes
+	// checkptr (-race / -d=checkptr=2) abort with "pointer arithmetic result
+	// points to invalid allocation". &buf[0] points at the real make([]byte)
+	// allocation, which checkptr can validate.
+	return p, unsafe.Slice((*T)(unsafe.Pointer(&buf[0])), n), nil
 }
 
 // Free is ...

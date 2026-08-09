@@ -38,7 +38,7 @@ func TestAllocator(t *testing.T) {
 func TestAlloc(t *testing.T) {
 	p, b, _ := Alloc[byte](1024)
 	buf := *p.Pointer
-	if uintptr(unsafe.Pointer(&buf[0])) != *(*uintptr)(unsafe.Pointer(&b)) {
+	if unsafe.Pointer(&buf[0]) != unsafe.Pointer(&b[0]) {
 		t.Errorf("Alloc error")
 	}
 }
